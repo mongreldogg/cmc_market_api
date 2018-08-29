@@ -1,0 +1,47 @@
+<?php
+
+define('BASE_DIR', __DIR__);
+define('__CONSOLE', true);
+define('EXECUTION_START_TIME', microtime(true));
+
+$files = glob('config/{{*/}*,*}*config.php', GLOB_BRACE);
+if(is_array($files))
+foreach(array_reverse($files) as $file) {include $file;}
+
+require_once "core/core.php";
+
+$files = glob('bundles/{{*/}*,*}*.bundle.php', GLOB_BRACE);
+foreach(array_reverse($files) as $file) {include $file;}
+
+$files = glob('events/{{*/}*,*}*.event.php', GLOB_BRACE);
+foreach($files as $file) {include $file;}
+
+$files = glob('routes/{{*/}*,*}*.php', GLOB_BRACE);
+foreach($files as $file) {include $file;}
+
+$commands = $argv;
+
+//-----------------------------
+
+use Core\Console;
+
+Console::AddCommand(CONSOLE_ANY, function(){
+	print_r('Unrecognized command!');
+});
+
+//-----------------------------
+
+print_r("CONSOLE:\r\n");
+
+foreach($commands as $id=>$command){
+	if($id > 0){
+		$command = explode(":", $command, 2);
+		if(isset($console[$command[0]])){
+			if(count($command) == 2) Console::Execute($command[0], $command[1]);
+			else Console::Execute($command[0], $command[0]);
+		} else {
+			if(count($command) == 2) Console::Execute($command[0], $command[1]);
+			else Console::Execute($command[0], $command[0]);
+		}
+	}
+}
